@@ -477,7 +477,7 @@ footer a { color: var(--accent); text-decoration: none; }
 </footer>
 
 <script>
-let API_KEY = localStorage.getItem('mg_api_key') || '';
+
 
 const state = {
   'e-type': 'restaurant', 'e-tone': 'professional and formal',
@@ -491,17 +491,9 @@ const state = {
 
 const lastOutput = {};
 
-window.addEventListener('DOMContentLoaded', () => {
-  if (!API_KEY) document.getElementById('api-banner').style.display = 'flex';
-});
 
-function saveKey() {
-  const v = document.getElementById('api-input').value.trim();
-  if (!v.startsWith('sk-ant')) { alert('Please enter a valid Anthropic API key (starts with sk-ant-)'); return; }
-  localStorage.setItem('mg_api_key', v);
-  API_KEY = v;
-  document.getElementById('api-banner').style.display = 'none';
-}
+
+
 
 function showTool(id, btn) {
   document.querySelectorAll('.tool-section').forEach(s => s.classList.remove('visible'));
@@ -586,7 +578,7 @@ async function generate(tool) {
   const prompt = buildPrompt(tool);
   if (!prompt) return;
 
-  if (!API_KEY) { document.getElementById('api-banner').style.display = 'flex'; return; }
+
 
   const btn = document.getElementById('btn-' + tool);
   const originalHTML = '✦ ' + labels[tool];
@@ -595,14 +587,9 @@ async function generate(tool) {
   document.getElementById('res-' + tool).style.display = 'none';
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/api/proxy', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': API_KEY,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-allow-browser': 'true'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
@@ -626,18 +613,15 @@ async function generate(tool) {
 
 async function refine(tool, instruction) {
   const original = lastOutput[tool];
-  if (!original || !API_KEY) return;
+  if (!original) return;
   const box = document.getElementById('out-' + tool);
   const prev = box.textContent;
   box.textContent = 'Refining...';
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/api/proxy', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': API_KEY,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-allow-browser': 'true'
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
