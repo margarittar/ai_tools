@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Tools — Margarita Gutnik</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F7F5F0;
+  --card: #FFFFFF;
+  --text: #1A1A18;
+  --muted: #6B6B65;
+  --accent: #2D5A3D;
+  --accent-light: #EAF2EC;
+  --amber: #C17B2F;
+  --amber-light: #FDF3E7;
+  --blue: #2B4C7E;
+  --blue-light: #EBF0F8;
+  --rose: #9B3A4A;
+  --rose-light: #FAEDEF;
+  --teal: #2A6B6B;
+  --teal-light: #E8F4F4;
+  --purple: #5B3A8A;
+  --purple-light: #F0EBF8;
+  --border: rgba(0,0,0,0.07);
+  --radius: 18px;
+  --shadow: 0 2px 16px rgba(0,0,0,0.06);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; line-height: 1.6; }
+
+/* API BANNER */
+#api-banner {
+  display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  background: var(--accent); color: white; padding: 12px 24px;
+  align-items: center; gap: 12px; flex-wrap: wrap;
+  font-size: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+}
+#api-banner input {
+  flex: 2; min-width: 220px; padding: 8px 12px; border-radius: 8px;
+  border: none; font-size: 13px; font-family: 'DM Sans', sans-serif;
+  background: rgba(255,255,255,0.18); color: white;
+}
+#api-banner input::placeholder { color: rgba(255,255,255,0.6); }
+#api-banner button {
+  padding: 8px 20px; border-radius: 8px; border: none;
+  background: white; color: var(--accent); font-weight: 500;
+  font-family: 'DM Sans', sans-serif; cursor: pointer; font-size: 13px;
+  white-space: nowrap;
+}
+
+/* HEADER */
+header { padding: 4rem 2rem 2.5rem; max-width: 900px; margin: 0 auto; }
+.eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.75rem; }
+h1 { font-family: 'DM Serif Display', serif; font-size: clamp(2.2rem, 5vw, 3.2rem); line-height: 1.12; margin-bottom: 1rem; }
+h1 em { font-style: italic; color: var(--accent); }
+.subtitle { color: var(--muted); font-size: 16px; max-width: 500px; margin-bottom: 1.75rem; }
+.contact-bar { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 13px; color: var(--muted); align-items: center; }
+.contact-bar a { color: var(--accent); text-decoration: none; font-weight: 500; }
+.contact-bar a:hover { text-decoration: underline; }
+.badge { font-size: 11px; background: var(--accent-light); color: var(--accent); padding: 3px 10px; border-radius: 100px; font-weight: 500; }
+
+/* NAV TABS */
+.nav-wrap { max-width: 900px; margin: 0 auto; padding: 0 2rem; margin-bottom: 2rem; }
+.nav-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.nav-tab {
+  font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 6px 14px;
+  border-radius: 100px; border: 1px solid var(--border); background: var(--card);
+  color: var(--muted); cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.nav-tab:hover { border-color: var(--accent); color: var(--accent); }
+.nav-tab.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+.divider { height: 1px; background: var(--border); max-width: 900px; margin: 0 auto 2rem; }
+
+/* MAIN */
+main { max-width: 900px; margin: 0 auto; padding: 0 2rem 5rem; }
+.tool-section { display: none; }
+.tool-section.visible { display: block; }
+
+/* CARD */
+.tool-card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
+.tool-header { padding: 1.5rem 1.75rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 1rem; }
+.tool-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 20px; }
+.tool-title { font-family: 'DM Serif Display', serif; font-size: 1.3rem; margin-bottom: 2px; }
+.tool-desc { font-size: 13px; color: var(--muted); }
+.tool-body { padding: 1.5rem 1.75rem; display: flex; flex-direction: column; gap: 1rem; }
+
+/* FIELDS */
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+label { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+input[type=text], input[type=password], textarea, select {
+  font-family: 'DM Sans', sans-serif; font-size: 14px;
+  padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px;
+  background: var(--bg); color: var(--text); outline: none; transition: border-color 0.15s; width: 100%;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+textarea { resize: vertical; min-height: 80px; }
+
+/* PILLS */
+.pill-group { display: flex; gap: 8px; flex-wrap: wrap; }
+.pill {
+  font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 5px 14px;
+  border-radius: 100px; border: 1px solid var(--border); background: transparent;
+  color: var(--muted); cursor: pointer; transition: all 0.15s;
+}
+.pill:hover { border-color: var(--accent); color: var(--accent); }
+.pill.on { background: var(--accent); border-color: var(--accent); color: white; }
+
+/* BUTTONS */
+.gen-btn {
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+  padding: 12px 24px; border-radius: 100px; border: none;
+  color: white; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; gap: 8px; transition: opacity 0.15s, transform 0.1s; width: 100%;
+}
+.gen-btn:hover { opacity: 0.88; }
+.gen-btn:active { transform: scale(0.98); }
+.gen-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.green { background: var(--accent); }
+.amber-btn { background: var(--amber); }
+.blue-btn { background: var(--blue); }
+.rose-btn { background: var(--rose); }
+.teal-btn { background: var(--teal); }
+.purple-btn { background: var(--purple); }
+
+/* RESULT */
+.result-area { display: none; flex-direction: column; gap: 12px; margin-top: 0.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border); }
+.result-label { display: flex; align-items: center; justify-content: space-between; }
+.result-label span { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.copy-btn { font-family: 'DM Sans', sans-serif; font-size: 12px; padding: 4px 14px; border-radius: 100px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; }
+.copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+.result-box { font-size: 14px; line-height: 1.75; color: var(--text); background: var(--bg); border-radius: 12px; padding: 16px; white-space: pre-wrap; border: 1px solid var(--border); }
+.quick-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.quick-btn { font-family: 'DM Sans', sans-serif; font-size: 12px; padding: 5px 12px; border-radius: 100px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; }
+.quick-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+footer { text-align: center; padding: 2rem; font-size: 12px; color: var(--muted); border-top: 1px solid var(--border); margin-top: 2rem; }
+footer a { color: var(--accent); text-decoration: none; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinning { display: inline-block; animation: spin 0.8s linear infinite; }
+@media (max-width: 540px) { .field-row { grid-template-columns: 1fr; } header, main, .nav-wrap { padding-left: 1.25rem; padding-right: 1.25rem; } }
+</style>
+</head>
+<body>
+
+<!-- API BANNER -->
+<div id="api-banner">
+  <span style="flex:1;min-width:160px;">🔑 Enter Anthropic API key to activate:</span>
+  <input id="api-input" type="password" placeholder="sk-ant-api03-...">
+  <button onclick="saveKey()">Activate</button>
+</div>
+
+<header>
+  <p class="eyebrow">AI tools by Margarita Gutnik</p>
+  <h1>Save hours every week<br>with <em>smart AI tools</em></h1>
+  <p class="subtitle">Seven free tools to show you what AI can do for your business. Pick a tool below and try it instantly.</p>
+  <div class="contact-bar">
+    <span class="badge">WU Vienna · Business Informatics</span>
+    <span>Want a custom setup?</span>
+    <a href="mailto:mp.gutnik@gmail.com">mp.gutnik@gmail.com</a>
+    <a href="https://linkedin.com/in/margarita-gutnik-2195b9305" target="_blank">LinkedIn ↗</a>
+  </div>
+</header>
+
+<div class="divider"></div>
+
+<div class="nav-wrap">
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showTool('email',this)">✉️ Email Responder</button>
+    <button class="nav-tab" onclick="showTool('product',this)">🏷️ Product Description</button>
+    <button class="nav-tab" onclick="showTool('review',this)">⭐ Review Responder</button>
+    <button class="nav-tab" onclick="showTool('proposal',this)">📄 Proposal Generator</button>
+    <button class="nav-tab" onclick="showTool('social',this)">📱 Social Media Posts</button>
+    <button class="nav-tab" onclick="showTool('meeting',this)">📝 Meeting Summary</button>
+    <button class="nav-tab" onclick="showTool('realestate',this)">🏠 Real Estate Listing</button>
+  </div>
+</div>
+
+<main>
+
+<!-- 1. EMAIL RESPONDER -->
+<div class="tool-section visible" id="tool-email">
+<div class="tool-card">
+  <div class="tool-header">
+    <div class="tool-icon" style="background:var(--accent-light);">✉️</div>
+    <div><p class="tool-title">Customer email responder</p><p class="tool-desc">Paste any complaint or enquiry → professional reply in seconds</p></div>
+  </div>
+  <div class="tool-body">
+    <div class="field"><label>Business type</label>
+      <div class="pill-group" id="e-type">
+        <button class="pill on" onclick="setPill(this,'e-type','restaurant')">Restaurant</button>
+        <button class="pill" onclick="setPill(this,'e-type','online shop')">Online shop</button>
+        <button class="pill" onclick="setPill(this,'e-type','hotel')">Hotel</button>
+        <button class="pill" onclick="setPill(this,'e-type','service agency')">Agency</button>
+        <button class="pill" onclick="setPill(this,'e-type','business')">Other</button>
+      </div>
+    </div>
+    <div class="field"><label>Tone</label>
+      <div class="pill-group" id="e-tone">
+        <button class="pill on" onclick="setPill(this,'e-tone','professional and formal')">Formal</button>
+        <button class="pill" onclick="setPill(this,'e-tone','warm and friendly')">Friendly</button>
+        <button class="pill" onclick="setPill(this,'e-tone','deeply empathetic')">Empathetic</button>
+      </div>
+    </div>
+    <div class="field"><label>Customer message</label><textarea id="e-msg" placeholder="Paste the customer complaint or enquiry here..."></textarea></div>
+    <button class="gen-btn green" onclick="generate('email')" id="btn-email">✦ Generate reply</button>
+    <div class="result-area" id="res-email">
+      <div class="result-label"><span>Generated reply</span><button class="copy-btn" onclick="copyBox('out-email')">Copy</button></div>
+      <div class="result-box" id="out-email"></div>
+      <div class="quick-actions">
+        <button class="quick-btn" onclick="refine('email','Make it shorter, max 3 sentences.')">Shorter</button>
+        <button class="quick-btn" onclick="refine('email','Offer a specific discount or compensation.')">Add offer</button>
+        <button class="quick-btn" onclick="refine('email','Translate to German.')">Auf Deutsch</button>
+        <button class="quick-btn" onclick="refine('email','Make it more formal.')">More formal</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 2. PRODUCT DESCRIPTION -->
+<div class="tool-section" id="tool-product">
+<div class="tool-card">
+  <div class="tool-header">
+    <div class="tool-icon" style="background:var(--amber-light);">🏷️</div>
+    <div><p class="tool-title">Product description generator</p><p class="tool-desc">Enter product details → selling description in English, German, or both</p></div>
+  </div>
+  <div class="tool-body">
+    <div class="field-row">
+      <div class="field"><label>Product name</label><input type="text" id="p-name" placeholder="e.g. Leather Weekend Bag"></div>
+      <div class="field"><label>Category</label><input type="text" id="p-cat" placeholder="e.g. Fashion, Electronics"></div>
+    </div>
+    <div class="field"><label>Key features (one per line)</label><textarea id="p-feat" placeholder="Genuine full-grain leather&#10;Fits 15&quot; laptop&#10;3 colour options"></textarea></div>
+    <div class="field"><label>Target customer</label><input type="text" id="p-target" placeholder="e.g. young professionals, students"></div>
+    <div class="field"><label>Language</label>
+      <div class="pill-group" id="p-lang">
+        <button class="pill on" onclick="setPill(this,'p-lang','English')">English</button>
+        <button class="pill" onclick="setPill(this,'p-lang','German')">Deutsch</button>
+        <button class="pill" onclick="setPill(this,'p-lang','both English and German')">Both</button>
+      </div>
+    </div>
+    <button class="gen-btn amber-btn" onclick="generate('product')" id="btn-product">✦ Generate description</button>
+    <div class="result-area" id="res-product">
+      <div class="result-label"><span>Generated description</span><button class="copy-btn" onclick="copyBox('out-product')">Copy</button></div>
+      <div class="result-box" id="out-product"></div>
+      <div class="quick-actions">
+        <button class="quick-btn" onclick="refine('product','Make it punchier, max 2 sentences.')">Punchier</button>
+        <button class="quick-btn" onclick="refine('product','Give it a premium luxury feel.')">More premium</button>
+        <button class="quick-btn" onclick="refine('product','Add SEO keywords naturally.')">Add SEO</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 3. REVIEW RESPONDER -->
+<div class="tool-section" id="tool-review">
+<div class="tool-card">
+  <div class="tool-header">
+    <div class="tool-icon" style="background:#FFF8E7;">⭐</div>
+    <div><p class="tool-title">Review responder</p><p class="tool-desc">Respond to Google, TripAdvisor or Booking.com reviews professionally</p></div>
+  </div>
+  <div class="tool-body">
+    <div class="field-row">
+      <div class="field"><label>Platform</label>
+        <div class="pill-group" id="r-platform">
+          <button class="pill on" onclick="setPill(this,'r-platform','Google')">Google</button>
+          <button class="pill" onclick="setPill(this,'r-platform','TripAdvisor')">TripAdvisor</button>
+          <button class="pill" onclick="setPill(this,'r-platform','Booking.com')">Booking.com</button>
+        </div>
+      </div>
+      <div class="field"><label>Rating</label>
+        <div class="pill-group" id="r-rating">
+          <button class="pill on" onclick="setPill(this,'r-rating','5-star positive')">⭐⭐⭐⭐⭐</button>
+          <button class="pill" onclick="setPill(this,'r-rating','3-star mixed')">⭐⭐⭐</button>
+          <button class="pill" onclick="setPill(this,'r-rating','1-star negative')">⭐</button>
+        </div>
+      </div>
+    </div>
+    <div class="field"><label>Customer review</label><textarea id="r-review" placeholder="Paste the customer review here..."></textarea></div>
+    <div class="field"><label>Business name (optional)</label><input type="text" id="r-biz" placeholder="e.g. Café Central, Hotel Imperial"></div>
+    <button class="gen-btn" style="background:#B45309;" onclick="generate('review')" id="btn-review">✦ Generate response</button>
+    <div class="result-area" id="res-review">
+      <div class="result-label"><span>Generated response</span><button class="copy-btn" onclick="copyBox('out-review')">Copy</button></div>
+      <div class="result-box" id="out-review"></div>
+      <div class="quick-actions">
+        <button class="quick-btn" onclick="refine('review','Make it shorter.')">Shorter</button>
+        <button class="quick-btn" onclick="refine('review','Translate to German.')">Auf Deutsch</button>
+        <button class="quick-btn" onclick="refine('review','Add an invitation to return.')">Add invitation</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 4. PROPOSAL GENERATOR -->
+<div class="tool-section" id="tool-proposal">
+<div class="tool-card">
+  <div class="tool-header">
+    <div class="tool-icon" style="background:var(--blue-light);">📄</div>
+    <div><p class="tool-title">Proposal generator</p><p class="tool-desc">Generate a professional freelance proposal from a few bullet points</p></div>
+  </div>
+  <div class="tool-body">
+    <div class="field-row">
+      <div class="field"><label>Your service / role</label><input type="text" id="pr-service" placeholder="e.g. Graphic Designer, Web Developer"></div>
+      <div class="field"><label>Client industry</label><input type="text" id="pr-industry" placeholder="e.g. Fashion, Tech startup, Restaurant"></div>
+    </div>
+    <div class="field"><label>Project details (what the client needs)</label><textarea id="pr-project" placeholder="e.g. Redesign their website, create new brand identity, 3 month timeline"></textarea></div>
+    <div class="field"><label>Your key strengths / experience</label><textarea id="pr-strengths" placeholder="e.g. 5 years experience, worked with 30+ clients, specialise in e-commerce"></textarea></div>
+    <div class="field-row">
+      <div class="field"><label>Budget range (optional)</label><input type="text" id="pr-budget" placeholder="e.g. €1,500 – €2,500"></div>
+      <div class="field"><label>Tone</label>
+        <div class="pill-group" id="pr-tone">
+          <button class="pill on" onclick="setPill(this,'pr-tone','professional and confident')">Professional</button>
+          <button class="pill" onclick="setPill(this,'pr-tone','warm and collaborative')">Warm</button>
+        </div>
+      </div>
+    </div>
+    <button class="gen-btn blue-btn" onclick="generate('proposal')" id="btn-proposal">✦ Generate proposal</button>
+    <div class="result-area" id="res-proposal">
+      <div class="result-label"><span>Generated proposal</span><button class="copy-btn" onclick="copyBox('out-proposal')">Copy</button></div>
+      <div class="result-box" id="out-proposal"></div>
+      <div class="quick-actions">
+        <button class="quick-btn" onclick="refine('proposal','Make it more concise.')">More concise</button>
+        <button class="quick-btn" onclick="refine('proposal','Add a stronger call to action at the end.')">Stronger CTA</button>
+        <button class="quick-btn" onclick="refine('proposal','Translate to German.')">Auf Deutsch</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 5. SOCIAL MEDIA -->
+<div class="tool-section" id="tool-social">
+<div class="tool-card">
+  <div class="tool-header">
+    <div class="tool-icon" style="background:var(--rose-light);">📱</div>
+    <div><p class="tool-title">Social media post generator</p><p class="tool-desc">Turn a topic or product into ready-to-post content for any platform</p></div>
+  </div>
+  <div class="tool-body">
+    <div class="field-row">
+      <div class="field"><label>Platform</label>
+        <div class="pill-group" id="s-platform">
+          <button class="pill on" onclick="setPill(this,'s-platform','Instagram')">Instagram</button>
+          <button class="pill" onclick="setPill(this,'s-platform','LinkedIn')">LinkedIn</button>
+          <button class="pill" onclick="setPill(this,'s-platform','Facebook')">Facebook</button>
+        </div>
+      </div>
+      <div class="field"><label>Tone</label>
+        <div class="pill-group" id="s-tone">
+          <button class="pill on" onclick="setPill(this,'s-tone','engaging and friendly')">Engaging</button>
+          <button class="pill" onclick="setPill(this,'s-tone','professional')">Professional</button>
+          <button class="pill" onclick="setPill(this,'s-tone','playful and fun')">Playful</button>
+        </div>
+      </div>
+    </div>
+    <div class="field"><label>Topic / product / message</label><textarea id="s-topic" placeholder="e.g. Launching our new summer menu, or tips for small business owners on saving time"></textarea></div>
+    <div class="field"><label>Business / brand (optional)</label><input type="text" id="s-brand" placeholder="e.g. Café Central, my photography studio"></div>
+    <div class="field"><label>Number of variations</label>
+      <div class="pill-group" id="s-count">
+        <button class="pill on" onclick="setPill(this,'s-count','1 variation')">1</button>
+        <button class="pill" onclick="setPill(this,'s-count','3 variations')">3</button>
+        <button class="pill" onclick="setPill(this,'s-count','5 variations')">5</button>
+      </div>
+    </div>
+    <button class="gen-btn rose-btn" onclick="generate('social')" id="btn-social">✦ Generate posts</button>
+    <div class="result-area" id="res-social">
+      <div class="result-label"><span>Generated posts</span><button class="copy-btn" onclick="copyBox('out-social')">Copy</button></div>
+      <div class="result-box" id="out-social"></div>
+      <div class="quick-actions">
+        <button class="quick-btn" onclick="refine('social','Add relevant hashtags to each post.')">Add hashtags</button>
+        <button class="quick-btn" onclick="refine('social','Make the posts shorter.')">Shorter</button>
+        <button class="quick-btn" onclick="refine('social','Translate to German.')">Auf Deutsch</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 6. MEETING SUMMARY -->
+<div class="tool-section" id="tool-meeting">
+<div class="tool-card">
+  <div class="tool-header">
+    <div class="tool-icon" style="background:var(--teal-light);">📝</div>
+    <div><p class="tool-title">Meeting summary generator</p><p class="tool-desc">Paste messy notes → structured summary + clear action items</p></div>
+  </div>
+  <div class="tool-body">
+    <div class="field"><label>Meeting notes (paste raw notes, keywords, anything)</label><textarea id="m-notes" style="min-height:120px;" placeholder="e.g. discussed Q3 budget, John to send report by Friday, need to hire 2 devs, launch pushed to September, Sarah concerned about timeline..."></textarea></div>
+    <div class="field-row">
+      <div class="field"><label>Meeting type</label>
+        <div class="pill-group" id="m-type">
+          <button class="pill on" onclick="setPill(this,'m-type','team meeting')">Team meeting</button>
+          <button class="pill" onclick="setPill(this,'m-type','client meeting')">Client meeting</button>
+          <button class="pill" onclick="setPill(this,'m-type','project kickoff')">Kickoff</button>
+        </div>
+      </div>
+      <div class="field"><label>Language</label>
+        <div class="pill-group" id="m-lang">
+          <button class="pill on" onclick="setPill(this,'m-lang','English')">English</button>
+          <button class="pill" onclick="setPill(this,'m-lang','German')">Deutsch</button>
+        </div>
+      </div>
+    </div>
+    <button class="gen-btn teal-btn" onclick="generate('meeting')" id="btn-meeting">✦ Generate summary</button>
+    <div class="result-area" id="res-meeting">
+      <div class="result-label"><span>Generated summary</span><button class="copy-btn" onclick="copyBox('out-meeting')">Copy</button></div>
+      <div class="result-box" id="out-meeting"></div>
+      <div class="quick-actions">
+        <button class="quick-btn" onclick="refine('meeting','Format action items as a numbered list with owners and deadlines.')">Format action items</button>
+        <button class="quick-btn" onclick="refine('meeting','Make it more concise.')">More concise</button>
+        <button class="quick-btn" onclick="refine('meeting','Add an executive summary at the top in 2 sentences.')">Add exec summary</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 7. REAL ESTATE -->
+<div class="tool-section" id="tool-realestate">
+<div class="tool-card">
+  <div class="tool-header">
+    <div class="tool-icon" style="background:var(--purple-light);">🏠</div>
+    <div><p class="tool-title">Real estate listing generator</p><p class="tool-desc">Enter property details → compelling listing in seconds</p></div>
+  </div>
+  <div class="tool-body">
+    <div class="field-row">
+      <div class="field"><label>Property type</label>
+        <div class="pill-group" id="re-type">
+          <button class="pill on" onclick="setPill(this,'re-type','apartment')">Apartment</button>
+          <button class="pill" onclick="setPill(this,'re-type','house')">House</button>
+          <button class="pill" onclick="setPill(this,'re-type','office')">Office</button>
+          <button class="pill" onclick="setPill(this,'re-type','commercial space')">Commercial</button>
+        </div>
+      </div>
+      <div class="field"><label>Listing type</label>
+        <div class="pill-group" id="re-listing">
+          <button class="pill on" onclick="setPill(this,'re-listing','for sale')">For sale</button>
+          <button class="pill" onclick="setPill(this,'re-listing','for rent')">For rent</button>
+        </div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Location</label><input type="text" id="re-location" placeholder="e.g. Vienna 7th district, near Mariahilfer Str."></div>
+      <div class="field"><label>Price</label><input type="text" id="re-price" placeholder="e.g. €450,000 or €1,200/month"></div>
+    </div>
+    <div class="field"><label>Key features (one per line)</label><textarea id="re-features" placeholder="85m², 3 rooms&#10;Renovated kitchen&#10;Balcony with city view&#10;U-Bahn 3 min walk&#10;Pet friendly"></textarea></div>
+    <div class="field"><label>Language</label>
+      <div class="pill-group" id="re-lang">
+        <button class="pill on" onclick="setPill(this,'re-lang','English')">English</button>
+        <button class="pill" onclick="setPill(this,'re-lang','German')">Deutsch</button>
+        <button class="pill" onclick="setPill(this,'re-lang','both English and German')">Both</button>
+      </div>
+    </div>
+    <button class="gen-btn purple-btn" onclick="generate('realestate')" id="btn-realestate">✦ Generate listing</button>
+    <div class="result-area" id="res-realestate">
+      <div class="result-label"><span>Generated listing</span><button class="copy-btn" onclick="copyBox('out-realestate')">Copy</button></div>
+      <div class="result-box" id="out-realestate"></div>
+      <div class="quick-actions">
+        <button class="quick-btn" onclick="refine('realestate','Make it more luxurious and premium.')">More premium</button>
+        <button class="quick-btn" onclick="refine('realestate','Add a strong call to action.')">Add CTA</button>
+        <button class="quick-btn" onclick="refine('realestate','Make it shorter.')">Shorter</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+</main>
+
+<footer>
+  Built by <a href="mailto:mp.gutnik@gmail.com">Margarita Gutnik</a> · Business Informatics, WU Vienna ·
+  Want a custom AI tool for your business? <a href="mailto:mp.gutnik@gmail.com">Let's talk →</a>
+</footer>
+
+<script>
+let API_KEY = localStorage.getItem('mg_api_key') || '';
+
+const state = {
+  'e-type': 'restaurant', 'e-tone': 'professional and formal',
+  'p-lang': 'English',
+  'r-platform': 'Google', 'r-rating': '5-star positive',
+  'pr-tone': 'professional and confident',
+  's-platform': 'Instagram', 's-tone': 'engaging and friendly', 's-count': '1 variation',
+  'm-type': 'team meeting', 'm-lang': 'English',
+  're-type': 'apartment', 're-listing': 'for sale', 're-lang': 'English'
+};
+
+const lastOutput = {};
+
+window.addEventListener('DOMContentLoaded', () => {
+  if (!API_KEY) document.getElementById('api-banner').style.display = 'flex';
+});
+
+function saveKey() {
+  const v = document.getElementById('api-input').value.trim();
+  if (!v.startsWith('sk-ant')) { alert('Please enter a valid Anthropic API key (starts with sk-ant-)'); return; }
+  localStorage.setItem('mg_api_key', v);
+  API_KEY = v;
+  document.getElementById('api-banner').style.display = 'none';
+}
+
+function showTool(id, btn) {
+  document.querySelectorAll('.tool-section').forEach(s => s.classList.remove('visible'));
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tool-' + id).classList.add('visible');
+  btn.classList.add('active');
+}
+
+function setPill(btn, group, val) {
+  document.getElementById(group).querySelectorAll('.pill').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  state[group] = val;
+}
+
+function copyBox(id) {
+  navigator.clipboard.writeText(document.getElementById(id).innerText);
+}
+
+function setLoading(tool, on) {
+  const btn = document.getElementById('btn-' + tool);
+  btn.disabled = on;
+  btn.innerHTML = on ? '<span class="spinning">↻</span> Generating...' : '✦ ' + btn.innerHTML.replace(/.*✦\s*/, '');
+}
+
+const labels = {
+  email: 'Generate reply', product: 'Generate description', review: 'Generate response',
+  proposal: 'Generate proposal', social: 'Generate posts', meeting: 'Generate summary', realestate: 'Generate listing'
+};
+
+function buildPrompt(tool) {
+  switch(tool) {
+    case 'email': {
+      const msg = document.getElementById('e-msg').value.trim();
+      if (!msg) { document.getElementById('e-msg').focus(); return null; }
+      return `You are a customer service expert for a ${state['e-type']}. Customer sent: "${msg}". Write a ${state['e-tone']} reply. Acknowledge the issue, apologise, offer a concrete next step. Email body only, no subject, under 120 words.`;
+    }
+    case 'product': {
+      const name = document.getElementById('p-name').value.trim();
+      const feat = document.getElementById('p-feat').value.trim();
+      if (!name || !feat) { document.getElementById(!name ? 'p-name' : 'p-feat').focus(); return null; }
+      const cat = document.getElementById('p-cat').value.trim() || 'General';
+      const target = document.getElementById('p-target').value.trim() || 'general audience';
+      return `Write a compelling product description in ${state['p-lang']} for an online shop. Product: ${name}. Category: ${cat}. Features:\n${feat}\nTarget: ${target}. Requirements: engaging hook, highlight top 3 benefits, subtle CTA, 80-120 words, flowing prose no bullet points.${state['p-lang']==='both English and German'?' English first, then blank line, then "Deutsche Version:"':''}`;
+    }
+    case 'review': {
+      const rev = document.getElementById('r-review').value.trim();
+      if (!rev) { document.getElementById('r-review').focus(); return null; }
+      const biz = document.getElementById('r-biz').value.trim();
+      return `You manage responses for ${biz || 'a business'} on ${state['r-platform']}. A customer left a ${state['r-rating']} review: "${rev}". Write a professional, genuine response that thanks them${state['r-rating'].includes('1') ? ', acknowledges the issue, apologises and offers to resolve it' : state['r-rating'].includes('3') ? ', acknowledges both positives and areas to improve' : ' and highlights what makes the business special'}. Under 100 words, no hashtags.`;
+    }
+    case 'proposal': {
+      const proj = document.getElementById('pr-project').value.trim();
+      if (!proj) { document.getElementById('pr-project').focus(); return null; }
+      const service = document.getElementById('pr-service').value.trim() || 'Freelancer';
+      const industry = document.getElementById('pr-industry').value.trim() || 'the client';
+      const strengths = document.getElementById('pr-strengths').value.trim();
+      const budget = document.getElementById('pr-budget').value.trim();
+      return `Write a ${state['pr-tone']} freelance proposal. Role: ${service}. Client industry: ${industry}. Project: ${proj}. My strengths: ${strengths || 'experienced professional'}. ${budget ? 'Budget: ' + budget + '.' : ''} Structure: brief intro, understanding of their need, why I'm the right fit, proposed approach, next step CTA. Under 200 words. No placeholders.`;
+    }
+    case 'social': {
+      const topic = document.getElementById('s-topic').value.trim();
+      if (!topic) { document.getElementById('s-topic').focus(); return null; }
+      const brand = document.getElementById('s-brand').value.trim();
+      return `Write ${state['s-count']} ${state['s-tone']} ${state['s-platform']} post${state['s-count']!=='1 variation'?'s':''} for ${brand||'a business'} about: ${topic}. Each post: max 150 words, ready to copy-paste, platform-appropriate tone. ${state['s-count']!=='1 variation'?'Separate each with ---':''}`;
+    }
+    case 'meeting': {
+      const notes = document.getElementById('m-notes').value.trim();
+      if (!notes) { document.getElementById('m-notes').focus(); return null; }
+      return `You are an expert at summarising ${state['m-type']} notes in ${state['m-lang']}. Raw notes: "${notes}". Create a structured summary with: 1) Key discussion points (3-5 bullets) 2) Decisions made 3) Action items (who, what, by when if mentioned). Clear, concise, professional.`;
+    }
+    case 'realestate': {
+      const feat = document.getElementById('re-features').value.trim();
+      if (!feat) { document.getElementById('re-features').focus(); return null; }
+      const loc = document.getElementById('re-location').value.trim() || 'Vienna';
+      const price = document.getElementById('re-price').value.trim();
+      return `Write a compelling real estate listing in ${state['re-lang']} for a ${state['re-type']} ${state['re-listing']} in ${loc}${price ? ' priced at ' + price : ''}. Key features:\n${feat}\nRequirements: compelling headline, highlight lifestyle benefits not just features, end with CTA, 100-150 words, professional tone.${state['re-lang']==='both English and German'?' English first, then blank line, then "Deutsche Version:"':''}`;
+    }
+  }
+}
+
+async function generate(tool) {
+  const prompt = buildPrompt(tool);
+  if (!prompt) return;
+
+  if (!API_KEY) { document.getElementById('api-banner').style.display = 'flex'; return; }
+
+  const btn = document.getElementById('btn-' + tool);
+  const originalHTML = '✦ ' + labels[tool];
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinning">↻</span> Generating...';
+  document.getElementById('res-' + tool).style.display = 'none';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-allow-browser': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    const text = data?.content?.[0]?.text;
+    if (!text) throw new Error('Empty response');
+    lastOutput[tool] = text;
+    document.getElementById('out-' + tool).textContent = text;
+    document.getElementById('res-' + tool).style.display = 'flex';
+  } catch(e) {
+    alert('Error: ' + e.message + '\n\nCheck your API key is correct and has credits.');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = originalHTML;
+}
+
+async function refine(tool, instruction) {
+  const original = lastOutput[tool];
+  if (!original || !API_KEY) return;
+  const box = document.getElementById('out-' + tool);
+  const prev = box.textContent;
+  box.textContent = 'Refining...';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-allow-browser': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: `Text:\n\n"${original}"\n\nInstruction: ${instruction}\n\nReturn only the revised text.` }]
+      })
+    });
+    const data = await res.json();
+    const text = data?.content?.[0]?.text;
+    if (!text) throw new Error();
+    lastOutput[tool] = text;
+    box.textContent = text;
+  } catch { box.textContent = prev; }
+}
+</script>
+</body>
+</html>
